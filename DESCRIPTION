@@ -1,0 +1,13 @@
+Package: MINISTOP
+Title: MINISTOP predictions
+Version: 0.0.0.9000
+Authors@R: person('Jairo', 'Hidalgo Migueles', email = 'jairo.hidalgo.migueles@gmail.com', role = c('cre', 'aut'))
+Description: Predictions from the MINISTOP structural equation models, movement behaviors, body composition, and physical fitness from 4 to 9 years old.
+License: What license is it under?
+Imports: 
+    config,
+    golem,
+    shiny
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
