@@ -10,7 +10,8 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # Your application UI logic 
     fluidPage(
-      h1("MINISTOP")
+      h1("MINISTOP"),
+      mod_ilrs4_ui("ilrs4_ui_1")
     )
   )
 }

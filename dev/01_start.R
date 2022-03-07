@@ -20,11 +20,11 @@
 ## 
 golem::fill_desc(
   pkg_name = "MINISTOP", # The Name of the package containing the App 
-  pkg_title = "PKG_TITLE", # The Title of the package containing the App 
-  pkg_description = "PKG_DESC.", # The Description of the package containing the App 
-  author_first_name = "AUTHOR_FIRST", # Your First Name
-  author_last_name = "AUTHOR_LAST", # Your Last Name
-  author_email = "AUTHOR@MAIL.COM", # Your Email
+  pkg_title = "MINISTOP predictions", # The Title of the package containing the App 
+  pkg_description = "Predictions from the MINISTOP structural equation models, movement behaviors, body composition, and physical fitness from 4 to 9 years old.", # The Description of the package containing the App 
+  author_first_name = "Jairo", # Your First Name
+  author_last_name = "Hidalgo Migueles", # Your Last Name
+  author_email = "jairo.hidalgo.migueles@gmail.com", # Your Email
   repo_url = NULL # The URL of the GitHub Repo (optional) 
 )     
 
@@ -38,6 +38,7 @@ usethis::use_readme_rmd( open = FALSE )
 usethis::use_code_of_conduct()
 usethis::use_lifecycle_badge( "Experimental" )
 usethis::use_news_md( open = FALSE )
+
 
 ## Use git ----
 usethis::use_git()

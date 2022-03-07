@@ -5,9 +5,23 @@ Authors@R: person('Jairo', 'Hidalgo Migueles', email = 'jairo.hidalgo.migueles@g
 Description: Predictions from the MINISTOP structural equation models, movement behaviors, body composition, and physical fitness from 4 to 9 years old.
 License: What license is it under?
 Imports: 
+    attempt,
+    compositions,
     config,
+    DT,
+    glue,
     golem,
-    shiny
+    htmltools,
+    leaflet,
+    plotly,
+    processx,
+    shiny,
+    shinyjs
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
+Suggests: 
+    spelling,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Language: en-US
