@@ -5,7 +5,7 @@
 #' @export
 #'
 #' @examples
-get_MS_predictions = function(get_preds = TRUE) {
+get_MS_predictions = function() {
   # packages
   require(compositions)
   
@@ -28,35 +28,35 @@ get_MS_predictions = function(get_preds = TRUE) {
   # new compositions for predictions ----
   # change in the ilr of interest (a = change in ilr of interest; b = change in the others to compensate a)
   
-  # ILR 1
-  a = c(1, seq((m4[1] - 10)/m4[1], (m4[1]+30)/m4[1], length.out = 20))
+  # Change in ILR 1 (from -10 to +30 min of VPA)
+  a = c(1, seq((m4[1] - 10)/m4[1], (m4[1] + 30)/m4[1], length.out = 20))
   b = (1440 - (m4[1]*a)) / (m4[2] + m4[3] + m4[4] + m4[5])
   ab_ilr1 = data.frame(ilr = c(0, rep(1, 20)), a = a, b = b,
                        # time-use composition at 4 years old
                        VPA4 = m4[1]*a, MPA4 = m4[2]*b, LPA4 = m4[3]*b, SB4 = m4[4]*b, Sleep4 = m4[5]*b)
   rm(a,b)
   
-  # ILR 2
-  # for the rest, b values calculated in https://www.symbolab.com/solver/equation-calculator
-  a = c(seq((m4[2] - 30)/m4[2], (m4[2] + 30)/m4[2], length.out = 20))
+  # Change in ILR 2 (from -30 to +30 min of MPA)
+  # b values calculated in https://www.symbolab.com/solver/equation-calculator
+  a = seq((m4[2] - 30)/m4[2], (m4[2] + 30)/m4[2], length.out = 20)
   b = c(1.02305, 1.02057, 1.01812, 1.01567, 1.01324, 1.01081, 1.0084, 1.00599, 1.00359, 1.0012, 0.998806, 0.996421,0.994041, 0.991664, 0.989292, 0.986923, 0.984556, 0.982193, 0.979833, 0.977475)
   ab_ilr2 = data.frame(ilr = 2, a = a, b = b,
                        # time-use composition at 4 years old
                        VPA4 = m4[1]*(a*b^3)^(1/4), MPA4 = m4[2]*a, LPA4 = m4[3]*b, SB4 = m4[4]*b, Sleep4 = m4[5]*b)
   rm(a,b)
   
-  # ILR 3
+  # Change in ILR 3 (from -90 to +90 min of LPA)
   # b values calculated in https://www.symbolab.com/solver/equation-calculator
-  a = c(seq((m4[3] - 90)/m4[3], (m4[3] + 90)/m4[3], length.out = 20))
+  a = seq((m4[3] - 90)/m4[3], (m4[3] + 90)/m4[3], length.out = 20)
   b = c(1.09015, 1.08057, 1.07101, 1.06147, 1.05195, 1.04246, 1.03299, 1.02354, 1.01411, 1.0047, 0.995305, 0.985929, 0.97657, 0.967228, 0.957901, 0.94859, 0.939294, 0.930013, 0.920746, 0.911493)
   ab_ilr3 = data.frame(ilr = 3, a = a, b = b,
                        # time-use composition at 4 years old
                        VPA4 = m4[1]*((a*b*b)^(1/3))^(1/4) * (a*b*b)^(1/4), MPA4 = m4[2]*(a*b*b)^(1/3), LPA4 = m4[3]*a, SB4 = m4[4]*b, Sleep4 = m4[5]*b)
   rm(a,b)
   
-  # ILR 4
+  # Change in ILR 4 (from -300 to +300 min of SB)
   # b values calculated in https://www.symbolab.com/solver/equation-calculator
-  a = c(seq((m4[4] - 300)/m4[4], (m4[4] + 300)/m4[4], length.out = 20))
+  a = seq((m4[4] - 300)/m4[4], (m4[4] + 300)/m4[4], length.out = 20)
   b = c(1.70747129300068, 1.61765, 1.53258396271130, 1.45163158459809, 1.37429607331649, 1.30019763836909, 1.22903672376019, 1.16057215920667, 1.09460734053028, 1.03098011732903, 0.969555539924622, 0.910221021541094, 0.852881845533020, 0.797458632034325, 0.743885001892015, 0.692105785227467, 0.642076049762841, 0.593759607742649, 0.547128623508218, 0.502163009780822)
   ab_ilr4 = data.frame(ilr = 4, a = a, b = b,
                        # time-use composition at 4 years old
@@ -74,7 +74,9 @@ get_MS_predictions = function(get_preds = TRUE) {
   rm(a, b, ab_ilr1, ab_ilr2, ab_ilr3, ab_ilr4)
   
   
-  # Predictions of outcomes at 9 years old ----
+  # -------------------------------------------------------------------------
+  # Predictions of outcomes at 9 years old ----------------------------------
+  # -------------------------------------------------------------------------
   out[, 13:14] = NA; colnames(out)[13:14] = c("a9", "b9")
   out[, 15:19] = NA; colnames(out)[15:19] = c("VPA9", "MPA9", "LPA9", "SB9", "Sleep9")
   out[, 20:23] = NA; colnames(out)[20:23] = c("ilr1_fu", "ilr2_fu", "ilr3_fu", "ilr4_fu")
@@ -82,7 +84,7 @@ get_MS_predictions = function(get_preds = TRUE) {
   # mean composition at 9
   out[1, 13:14] = 1; out[1, 15:19] = m9; out[1, 20:23] = ilr.m9
   
-  # for changes in ilr1 at baseline
+  # for changes in ilr1 at 4 years, then I use the regression coefficient for the ILR1 from 4 to 9 years (0.205)
   what = which(out$ilr == 1)
   out$ilr1_fu[what] = ilr.m9[1] + (0.205*(out$ilr1_bl[what] - ilr.m4[1]))
   out$ilr2_fu[what] = ilr.m9[2]
@@ -98,7 +100,7 @@ get_MS_predictions = function(get_preds = TRUE) {
   out$SB9[what] = m9[4] * out$b9[what]
   out$Sleep9[what] = m9[5] * out$b9[what]
   
-  # for changes in ilr2 at baseline
+  # for changes in ilr2 at 4 years, then I use the regression coefficient for the ILR2 from 4 to 9 years (0.181)
   what = which(out$ilr == 2)
   out$ilr1_fu[what] = ilr.m9[1]
   out$ilr2_fu[what] = ilr.m9[2] + (0.181*(out$ilr2_bl[what] - ilr.m4[2]))
@@ -115,7 +117,7 @@ get_MS_predictions = function(get_preds = TRUE) {
   out$SB9[what] = m9[4] * out$b9[what]
   out$Sleep9[what] = m9[5] * out$b9[what]
   
-  # for changes in ilr3 at baseline
+  # for changes in ilr3 at 4 years, then I use the regression coefficient for the ILR3 from 4 to 9 years (0.046)
   what = which(out$ilr == 3)
   out$ilr1_fu[what] = ilr.m9[1]
   out$ilr2_fu[what] = ilr.m9[2] 
@@ -132,7 +134,7 @@ get_MS_predictions = function(get_preds = TRUE) {
   out$SB9[what] = m9[4] * out$b9[what]
   out$Sleep9[what] = m9[5] * out$b9[what]
   
-  # for changes in ilr4 at baseline
+  # for changes in ilr4 at 4 years, then I use the regression coefficient for the ILR4 from 4 to 9 years (0.068)
   what = which(out$ilr == 4)
   out$ilr1_fu[what] = ilr.m9[1]
   out$ilr2_fu[what] = ilr.m9[2] 
@@ -155,8 +157,9 @@ get_MS_predictions = function(get_preds = TRUE) {
   # clean out
   out = out[complete.cases(out), ]
   
-  
-  # BODY COMPOSITION AND PHYSICAL FITNESS PREDICTIONS ----
+  # -------------------------------------------------------------------------
+  # BODY COMPOSITION AND PHYSICAL FITNESS PREDICTIONS -----------------------
+  # -------------------------------------------------------------------------
   out[, 24:27] = NA; colnames(out)[24:27] = c("FMI9", "CRF9", "Motor9", "Str9")
   
   # mean composition at 9
@@ -171,24 +174,24 @@ get_MS_predictions = function(get_preds = TRUE) {
   
   # for changes in ilr2
   what = which(out$ilr == 2)
-  out$FMI9[what] = (-0.070*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$CRF9[what] = (0.706*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$Motor9[what] = (-0.047*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$Str9[what] = (0.047*(out$ilr1_fu[what] - ilr.m9[1]))
+  out$FMI9[what] = (-0.070*(out$ilr2_fu[what] - ilr.m9[2]))
+  out$CRF9[what] = (0.706*(out$ilr2_fu[what] - ilr.m9[2]))
+  out$Motor9[what] = (-0.047*(out$ilr2_fu[what] - ilr.m9[2]))
+  out$Str9[what] = (0.047*(out$ilr2_fu[what] - ilr.m9[2]))
   
   # for changes in ilr3
   what = which(out$ilr == 3)
-  out$FMI9[what] = (-0.019*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$CRF9[what] = (0.236*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$Motor9[what] = (-0.019*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$Str9[what] = (0.020*(out$ilr1_fu[what] - ilr.m9[1]))
+  out$FMI9[what] = (-0.019*(out$ilr3_fu[what] - ilr.m9[3]))
+  out$CRF9[what] = (0.236*(out$ilr3_fu[what] - ilr.m9[3]))
+  out$Motor9[what] = (-0.019*(out$ilr3_fu[what] - ilr.m9[3]))
+  out$Str9[what] = (0.020*(out$ilr3_fu[what] - ilr.m9[3]))
   
   # for changes in ilr4
   what = which(out$ilr == 4)
-  out$FMI9[what] = (0.038*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$CRF9[what] = (-0.217*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$Motor9[what] = (0.023*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$Str9[what] = (-0.024*(out$ilr1_fu[what] - ilr.m9[1]))
+  out$FMI9[what] = (0.038*(out$ilr4_fu[what] - ilr.m9[4]))
+  out$CRF9[what] = (-0.217*(out$ilr4_fu[what] - ilr.m9[4]))
+  out$Motor9[what] = (0.023*(out$ilr4_fu[what] - ilr.m9[4]))
+  out$Str9[what] = (-0.024*(out$ilr4_fu[what] - ilr.m9[4]))
   
   # return
   return(out)
