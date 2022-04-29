@@ -50,34 +50,43 @@ mod_ilrs4_ui <- function(id){
                            min = 213.2692, max = 513.2692,
                            value = 513.2692, step = 31.57895,
                            round = TRUE, post = "min/day")
-      )
+      ),
+      hr(),
+      div("citation to paper when published")
     ),
     shiny::mainPanel(
-      div(
-        col_6(
-          plotly::plotlyOutput(ns("pieChart4"))
+      fluidRow(
+        div(
+          h3("Your selection"),
+          hr(),
+          # plotly::plotlyOutput(ns("pieChart4"))
+          DT::dataTableOutput(ns("Table4"))
         ),
-        col_6(
-          plotly::plotlyOutput(ns("pieChart9"))
+      ),
+      fluidRow(
+        div(
+          hr(),
+          h3("Outcomes derived from model coefficients"),
+          hr(),
+          col_4(
+            plotly::plotlyOutput(ns("pieChart9"))
+          ),
+          col_2(
+            plotly::plotlyOutput(ns("barFMI9"))
+          ),
+          col_2(
+            plotly::plotlyOutput(ns("barCRF9"))
+          ),
+          col_2(
+            plotly::plotlyOutput(ns("barMotor9"))
+          ),
+          col_2(
+            plotly::plotlyOutput(ns("barStr9"))
+          )
         )
-      ),
-      div(
-        textOutput(ns("textFMI9"))
-      ),
-      div(
-        textOutput(ns("textCRF9"))
-      ),
-      div(
-        textOutput(ns("textMotor9"))
-      ),
-      div(
-        textOutput(ns("textStr9"))
       )
     )
-    
   )
-  
-  
 }
 
 #' ilrs4 Server Functions
@@ -110,90 +119,117 @@ mod_ilrs4_server <- function(id){
       out = MINISTOP::get_MS_predictions()
       
       
-      if (input$select == "VPA") {
-        row = reactive(which.min(abs(out$VPA4 - input$ilr1)))
-        data_plot = reactive(data.frame(x = c("VPA", "MPA", "LPA", "SB", "Sleep"),
-                                        values_4 = as.numeric(out[row(), c("VPA4", "MPA4", "LPA4", "SB4", "Sleep4")]),
-                                        values_9 = as.numeric(out[row(), c("VPA9", "MPA9", "LPA9", "SB9", "Sleep9")])))
-        FMI9 = reactive(as.numeric(out[row(), c("FMI9")]))
-        CRF9 = reactive(as.numeric(out[row(), c("CRF9")]))
-        Motor9 = reactive(as.numeric(out[row(), c("Motor9")]))
-        Str9 = reactive(as.numeric(out[row(), c("Str9")]))
-      }
+      if (input$select == "VPA") row = reactive(which.min(abs(out$VPA4 - input$ilr1)))
+      if (input$select == "MPA") row = reactive(which.min(abs(out$MPA4 - input$ilr2)))
+      if (input$select == "LPA") row = reactive(which.min(abs(out$LPA4 - input$ilr3)))
+      if (input$select == "SB") row = reactive(which.min(abs(out$SB4 - input$ilr4)))
       
-      if (input$select == "MPA") {
-        row = reactive(which.min(abs(out$MPA4 - input$ilr2)))
-        data_plot = reactive(data.frame(x = c("VPA", "MPA", "LPA", "SB", "Sleep"),
-                                        values_4 = as.numeric(out[row(), c("VPA4", "MPA4", "LPA4", "SB4", "Sleep4")]),
-                                        values_9 = as.numeric(out[row(), c("VPA9", "MPA9", "LPA9", "SB9", "Sleep9")])))
-        FMI9 = reactive(as.numeric(out[row(), c("FMI9")]))
-        CRF9 = reactive(as.numeric(out[row(), c("CRF9")]))
-        Motor9 = reactive(as.numeric(out[row(), c("Motor9")]))
-        Str9 = reactive(as.numeric(out[row(), c("Str9")]))
-      }
+      data_plot = reactive(data.frame(x = c("VPA", "MPA", "LPA", "SB", "Sleep"),
+                                      values_4 = as.numeric(out[row(), c("VPA4", "MPA4", "LPA4", "SB4", "Sleep4")]),
+                                      values_9 = as.numeric(out[row(), c("VPA9", "MPA9", "LPA9", "SB9", "Sleep9")])))
+      FMI9 = reactive(data.frame(x = "",
+                                 y = as.numeric(out[row(), c("FMI9")])))
+      CRF9 = reactive(data.frame(x = "",
+                                 y = as.numeric(out[row(), c("CRF9")])))
+      Motor9 = reactive(data.frame(x = "",
+                                   y = as.numeric(out[row(), c("Motor9")])))
+      Str9 = reactive(data.frame(x = "",
+                                 y = as.numeric(out[row(), c("Str9")])))
       
-      if (input$select == "LPA") {
-        row = reactive(which.min(abs(out$LPA4 - input$ilr3)))
-        data_plot = reactive(data.frame(x = c("VPA", "MPA", "LPA", "SB", "Sleep"),
-                                        values_4 = as.numeric(out[row(), c("VPA4", "MPA4", "LPA4", "SB4", "Sleep4")]),
-                                        values_9 = as.numeric(out[row(), c("VPA9", "MPA9", "LPA9", "SB9", "Sleep9")])))
-        FMI9 = reactive(as.numeric(out[row(), c("FMI9")]))
-        CRF9 = reactive(as.numeric(out[row(), c("CRF9")]))
-        Motor9 = reactive(as.numeric(out[row(), c("Motor9")]))
-        Str9 = reactive(as.numeric(out[row(), c("Str9")]))
-      }
       
-      if (input$select == "SB") {
-        row = reactive(which.min(abs(out$SB4 - input$ilr4)))
-        data_plot = reactive(data.frame(x = c("VPA", "MPA", "LPA", "SB", "Sleep"),
-                                        values_4 = as.numeric(out[row(), c("VPA4", "MPA4", "LPA4", "SB4", "Sleep4")]),
-                                        values_9 = as.numeric(out[row(), c("VPA9", "MPA9", "LPA9", "SB9", "Sleep9")])))
-        FMI9 = reactive(as.numeric(out[row(), c("FMI9")]))
-        CRF9 = reactive(as.numeric(out[row(), c("CRF9")]))
-        Motor9 = reactive(as.numeric(out[row(), c("Motor9")]))
-        Str9 = reactive(as.numeric(out[row(), c("Str9")]))
-        
-      }
+      # # PIECHART 4 YEARS ---------------------------
+      # output$pieChart4 = plotly::renderPlotly({
+      #   p = plotly::plot_ly(data_plot(), labels = ~factor(x), values = ~values_4, 
+      #                       type = 'pie',
+      #                       textinfo = "text",
+      #                       insidetextfont = list(color = '#FFFFFF'),
+      #                       hovertemplate = "<b>%{label}:</b>  %{text} <br>%{percent}</br><extra></extra>",
+      #                       text = ~paste0(round(values_4), " min/day"),
+      #                       marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c"),
+      #                                     line = list(color = '#FFFFFF', width = 2)),
+      #                       showlegend = FALSE)
+      #   p = plotly::layout(p, title = '<b>Your selected composition\n(4 years old)</b>')
+      #   p
+      # })
       
-      output$pieChart4 = plotly::renderPlotly({
-        p = plotly::plot_ly(data_plot(), labels = ~factor(x), values = ~values_4, 
-                            type = 'pie',
-                            # textposition = 'outside',
-                            textinfo = "text",
-                            insidetextfont = list(color = '#FFFFFF'),
-                            # hoverinfo = "text",
-                            hovertemplate = "<b>%{label}:</b>  %{text} <br>%{percent}</br><extra></extra>",
-                            text = ~paste0(round(values_4), " min/day"),
-                            marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c"),
-                                          line = list(color = '#FFFFFF', width = 2)),
-                            showlegend = FALSE)
-        p = plotly::layout(p, title = '<b>4 years old (Selected)</b>')
-        p
-      })
+      # Table 4 YEARS ---------------------------
+      output$Table4 = DT::renderDataTable(DT::datatable(data.frame('Vigorous Physical Activity' = paste(round(data_plot()$values_4[1],1),"min/day"),
+                                                                   'Moderate Physical Activity' = paste(round(data_plot()$values_4[2],1),"min/day"),
+                                                                   'Light Physical Activity' = paste(round(data_plot()$values_4[3],1), "min/day"),
+                                                                   'Sedentary Behaviour' = paste(round(data_plot()$values_4[4],1),"min/day"),
+                                                                   'Sleep Time' = paste(round(data_plot()$values_4[5],1), "min/day"),
+                                                                   check.names = F),
+                                                        options = list(dom = 't', columnDefs = list(list(className = 'dt-center', targets = 0:4))), 
+                                                        rownames = FALSE))
       
       # PIECHART 9 YEARS ---------------------------
       output$pieChart9 = plotly::renderPlotly({
         p = plotly::plot_ly(data_plot(), labels = ~factor(x), values = ~values_9, 
                             type = 'pie',
-                            # textposition = 'outside',
-                            textinfo = "text",
+                            textinfo = "label",
                             insidetextfont = list(color = '#FFFFFF'),
-                            # hoverinfo = "text",
                             hovertemplate = "<b>%{label}:</b>  %{text} <br>%{percent}</br><extra></extra>",
                             text = ~paste0(round(values_9), " min/day"),
                             marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c"),
                                           line = list(color = '#FFFFFF', width = 2)),
                             showlegend = FALSE)
-        p = plotly::layout(p, title = '<b>9 years old (Predicted)</b>')
+        p = plotly::layout(p, title = '\n')
         p
       })
       
       # PREDICTIONS BODY COMPOSITION AND PHYSICAL FITNESS ---------------------------
-      output$textFMI9 = renderText(c("Predicted change in FMI at 9 years: ", as.character(round(FMI9(), 3)), " kg/m2"))
-      output$textCRF9 = renderText(c("Predicted change in CRF at 9 years: ", as.character(round(CRF9(), 3)), " laps"))
-      output$textMotor9 = renderText(c("Predicted change in Motor fitness at 9 years: ", as.character(round(Motor9(), 3)), " s"))
-      output$textStr9 = renderText(c("Predicted change in Muscular fitness at 9 years: ", as.character(round(Str9(), 3)), " kg"))
       
+      output$barFMI9 = plotly::renderPlotly({
+        p = plotly::plot_ly(FMI9(), x = ~factor(x), y = ~y, 
+                            type = 'bar',
+                            insidetextfont = list(color = '#FFFFFF'),
+                            hoverinfo = "text",
+                            text = ~paste0(round(FMI9()$y, 3), " kg/m2"),
+                            marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c")[1]),
+                            showlegend = FALSE)
+        p = plotly::layout(p, yaxis = list(title = "Fat mass index", range = c(-0.05, 0.15), showticklabels = FALSE),
+                           xaxis = list(title = ""))
+        p
+      })
+      
+      output$barCRF9 = plotly::renderPlotly({
+        p = plotly::plot_ly(CRF9(), x = ~factor(x), y = ~y, 
+                            type = 'bar',
+                            # textposition = 'outside',
+                            insidetextfont = list(color = '#FFFFFF'),
+                            # hoverinfo = "text",
+                            # hovertemplate = "<b>%{label}:</b>  %{text} <br>%{percent}</br><extra></extra>",
+                            text = ~paste0(round(CRF9()$y, 3), " laps"),
+                            marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c")[2]),
+                            showlegend = FALSE)
+        p = plotly::layout(p, yaxis = list(title = "Aerobic fitness", range = c(-0.05, 0.4), showticklabels = FALSE),
+                           xaxis = list(title = ""))
+        p
+      })
+      
+      output$barMotor9 = plotly::renderPlotly({
+        p = plotly::plot_ly(Motor9(), x = ~factor(x), y = ~y, 
+                            type = 'bar',
+                            insidetextfont = list(color = '#FFFFFF'),
+                            text = ~paste0(round(Motor9()$y, 3), " seconds"),
+                            marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c")[3]),
+                            showlegend = FALSE)
+        p = plotly::layout(p, yaxis = list(title = "Motor fitness", range = c(-0.05, 0.15), showticklabels = FALSE),
+                           xaxis = list(title = ""))
+        p
+      })
+      
+      output$barStr9 = plotly::renderPlotly({
+        p = plotly::plot_ly(Str9(), x = ~factor(x), y = ~y, 
+                            type = 'bar',
+                            insidetextfont = list(color = '#FFFFFF'),
+                            text = ~paste0(round(Str9()$y, 3), " seconds"),
+                            marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c")[4]),
+                            showlegend = FALSE)
+        p = plotly::layout(p, yaxis = list(title = "Muscular fitness", range = c(-0.05, 0.15), showticklabels = FALSE),
+                           xaxis = list(title = ""))
+        p
+      })
       
     })
   })

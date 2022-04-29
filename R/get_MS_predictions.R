@@ -7,7 +7,9 @@
 #' @examples
 get_MS_predictions = function() {
   # packages
-  require(compositions)
+  suppressMessages(
+    require(compositions)
+  )
   
   # # basic data ----
   # compo_names = c("VPA", "MPA", "LPA", "SB", "Sleep")
