@@ -6,10 +6,6 @@ output: github_document
 
 # MINISTOP
 
-<!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-<!-- badges: end -->
-
 The goal of the MINISTOP app is to provide visualizations of the longitudinal associations
 of physical behaviours (measured at 4 and 9 years old) with body composition and 
 physical fitness measured at 9 years old. The visualizations correspond to the paper 
