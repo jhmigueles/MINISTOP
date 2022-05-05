@@ -223,7 +223,7 @@ mod_ilrs4_server <- function(id){
         p = plotly::plot_ly(Str9(), x = ~factor(x), y = ~y, 
                             type = 'bar',
                             insidetextfont = list(color = '#FFFFFF'),
-                            text = ~paste0(round(Str9()$y, 3), " seconds"),
+                            text = ~paste0(round(Str9()$y, 3), " SDs"),
                             marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c")[4]),
                             showlegend = FALSE)
         p = plotly::layout(p, yaxis = list(title = "Muscular fitness", range = c(-0.05, 0.15), showticklabels = FALSE),
