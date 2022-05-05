@@ -57,7 +57,7 @@ mod_ilrs4_ui <- function(id){
     shiny::mainPanel(
       fluidRow(
         div(
-          h3("Your selection"),
+          h3("Your selection (4 years old)"),
           hr(),
           # plotly::plotlyOutput(ns("pieChart4"))
           DT::dataTableOutput(ns("Table4"))
@@ -66,7 +66,7 @@ mod_ilrs4_ui <- function(id){
       fluidRow(
         div(
           hr(),
-          h3("Outcomes derived from model coefficients"),
+          h3("Outcomes derived from model coefficients (9 years old)"),
           hr(),
           col_4(
             plotly::plotlyOutput(ns("pieChart9"))
