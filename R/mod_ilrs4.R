@@ -23,33 +23,29 @@ mod_ilrs4_ui <- function(id){
       div(
         shiny::sliderInput(inputId = ns("ilr1"),
                            label = "ILR 1: VPA vs MPA·LPA·SB·Sleep",
-                           min = 0.124520, max = 40.124520,
-                           value = 10.124520, step = 2.105263,
-                           round = TRUE, post = "min/day")
+                           min = -10, max = 30,
+                           value = 0, step = 1, post = " min/day")
       ),
       hr(),
       div(
         shiny::sliderInput(inputId = ns("ilr2"),
                            label = "ILR 2: MPA vs LPA·SB·Sleep",
-                           min = 24.14555, max = 84.14555,
-                           value = 54.14555, step = 3.157895,
-                           round = TRUE, post = "min/day")
+                           min = -30, max = 30,
+                           value = 0, step = 2, post = " min/day")
       ),
       hr(),
       div(
         shiny::sliderInput(inputId = ns("ilr3"),
                            label = "ILR 3: LPA vs SB·Sleep",
-                           min = 257.9626, max = 437.9626,
-                           value = 347.9626, step = 9.473684,
-                           round = TRUE, post = "min/day")
+                           min = -90, max = 90,
+                           value = 0, step = 5, post = " min/day")
       ),
       hr(),
       div(
         shiny::sliderInput(inputId = ns("ilr4"),
                            label = "ILR 4: SB vs Sleep",
-                           min = 213.2692, max = 513.2692,
-                           value = 513.2692, step = 31.57895,
-                           round = TRUE, post = "min/day")
+                           min = -300, max = 300,
+                           value = 0, step = 15, post = " min/day")
       ),
       hr(),
       div("citation to paper when published")
@@ -68,21 +64,23 @@ mod_ilrs4_ui <- function(id){
           hr(),
           h3("Outcomes derived from model coefficients (9 years old)"),
           hr(),
-          col_4(
-            plotly::plotlyOutput(ns("pieChart9"))
+          col_6(
+            # plotly::plotlyOutput(ns("pieChart9"))
+            plotly::plotlyOutput(ns("barChart9"))
           ),
-          col_2(
+          col_3(
             plotly::plotlyOutput(ns("barFMI9"))
           ),
-          col_2(
+          col_3(
             plotly::plotlyOutput(ns("barCRF9"))
-          ),
-          col_2(
-            plotly::plotlyOutput(ns("barMotor9"))
-          ),
-          col_2(
-            plotly::plotlyOutput(ns("barStr9"))
           )
+          # ,
+          # col_2(
+          #   plotly::plotlyOutput(ns("barMotor9"))
+          # ),
+          # col_2(
+          #   plotly::plotlyOutput(ns("barStr9"))
+          # )
         )
       )
     )
@@ -106,51 +104,34 @@ mod_ilrs4_server <- function(id){
       shinyjs::toggleState(id = "ilr4", condition = input$select == "SB")
       
       # if a different ilr is selected, slider = 1
-      if(input$select != "VPA") updateSliderInput(session = session, inputId = "ilr1", value = 10.124520)
-      if(input$select != "MPA") updateSliderInput(session = session, inputId = "ilr2", value = 54.14555)
-      if(input$select != "LPA") updateSliderInput(session = session, inputId = "ilr3", value = 347.9626)
-      if(input$select != "SB") updateSliderInput(session = session, inputId = "ilr4", value = 513.2692)
+      if(input$select != "VPA") updateSliderInput(session = session, inputId = "ilr1", value = 0)
+      if(input$select != "MPA") updateSliderInput(session = session, inputId = "ilr2", value = 0)
+      if(input$select != "LPA") updateSliderInput(session = session, inputId = "ilr3", value = 0)
+      if(input$select != "SB") updateSliderInput(session = session, inputId = "ilr4", value = 0)
     })
     
     # PIE CHART 4 years old ------------------------------------------------
     # data for plot if ILR 1 modified
     observeEvent(input$select, {
       
-      out = MINISTOP::get_MS_predictions()
+      m4 = as.numeric(out[1, c("VPA4", "MPA4", "LPA4", "SB4", "Sleep4")])
       
-      
-      if (input$select == "VPA") row = reactive(which.min(abs(out$VPA4 - input$ilr1)))
-      if (input$select == "MPA") row = reactive(which.min(abs(out$MPA4 - input$ilr2)))
-      if (input$select == "LPA") row = reactive(which.min(abs(out$LPA4 - input$ilr3)))
-      if (input$select == "SB") row = reactive(which.min(abs(out$SB4 - input$ilr4)))
+      if (input$select == "VPA") row = reactive(which(out$ilr == 1 & round(out$VPA4) == input$ilr1))
+      if (input$select == "MPA") row = reactive(which(out$ilr == 2 & round(out$MPA4) == input$ilr2))
+      if (input$select == "LPA") row = reactive(which(out$ilr == 3 & round(out$LPA4) == input$ilr3))
+      if (input$select == "SB")  row = reactive(which(out$ilr == 4 & round(out$SB4)  == input$ilr4))
       
       data_plot = reactive(data.frame(x = c("VPA", "MPA", "LPA", "SB", "Sleep"),
-                                      values_4 = as.numeric(out[row(), c("VPA4", "MPA4", "LPA4", "SB4", "Sleep4")]),
+                                      values_4 = as.numeric(out[row(), c("VPA4", "MPA4", "LPA4", "SB4", "Sleep4")]) + m4,
                                       values_9 = as.numeric(out[row(), c("VPA9", "MPA9", "LPA9", "SB9", "Sleep9")])))
       FMI9 = reactive(data.frame(x = "",
                                  y = as.numeric(out[row(), c("FMI9")])))
       CRF9 = reactive(data.frame(x = "",
-                                 y = as.numeric(out[row(), c("CRF9")])))
+                                 y = as.numeric(out[row(), c("laps20m9")])))
       Motor9 = reactive(data.frame(x = "",
-                                   y = as.numeric(out[row(), c("Motor9")])))
+                                   y = as.numeric(out[row(), c("Speed9")])))
       Str9 = reactive(data.frame(x = "",
                                  y = as.numeric(out[row(), c("Str9")])))
-      
-      
-      # # PIECHART 4 YEARS ---------------------------
-      # output$pieChart4 = plotly::renderPlotly({
-      #   p = plotly::plot_ly(data_plot(), labels = ~factor(x), values = ~values_4, 
-      #                       type = 'pie',
-      #                       textinfo = "text",
-      #                       insidetextfont = list(color = '#FFFFFF'),
-      #                       hovertemplate = "<b>%{label}:</b>  %{text} <br>%{percent}</br><extra></extra>",
-      #                       text = ~paste0(round(values_4), " min/day"),
-      #                       marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c"),
-      #                                     line = list(color = '#FFFFFF', width = 2)),
-      #                       showlegend = FALSE)
-      #   p = plotly::layout(p, title = '<b>Your selected composition\n(4 years old)</b>')
-      #   p
-      # })
       
       # Table 4 YEARS ---------------------------
       output$Table4 = DT::renderDataTable(DT::datatable(data.frame('Vigorous Physical Activity' = paste(round(data_plot()$values_4[1],1),"min/day"),
@@ -177,6 +158,23 @@ mod_ilrs4_server <- function(id){
         p
       })
       
+      
+      
+      
+      output$barChart9 = plotly::renderPlotly({
+        p = plotly::plot_ly(data_plot(), x = ~factor(x), y = ~values_9, 
+                            type = 'bar',
+                            insidetextfont = list(color = '#FFFFFF'),
+                            hoverinfo = "text",
+                            text = ~paste0(round(values_9), " min/day"),
+                            marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c"),
+                                          line = list(color = '#FFFFFF', width = 2)),
+                            showlegend = FALSE)
+        p = plotly::layout(p, title = 'Movement behaviors',
+                           yaxis = list(title = "min/day", range = c(-8, 8)))
+        p
+      })
+      
       # PREDICTIONS BODY COMPOSITION AND PHYSICAL FITNESS ---------------------------
       
       output$barFMI9 = plotly::renderPlotly({
@@ -187,7 +185,9 @@ mod_ilrs4_server <- function(id){
                             text = ~paste0(round(FMI9()$y, 3), " kg/m2"),
                             marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c")[1]),
                             showlegend = FALSE)
-        p = plotly::layout(p, yaxis = list(title = "Fat mass index", range = c(-0.05, 0.15), showticklabels = FALSE),
+        p = plotly::layout(p, title = "Fat mass index", 
+                           yaxis = list(title = "kg/m2", range = c(-0.1, 0.2), 
+                                           showticklabels = FALSE),
                            xaxis = list(title = ""))
         p
       })
@@ -202,7 +202,9 @@ mod_ilrs4_server <- function(id){
                             text = ~paste0(round(CRF9()$y, 3), " laps"),
                             marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c")[2]),
                             showlegend = FALSE)
-        p = plotly::layout(p, yaxis = list(title = "Aerobic fitness", range = c(-0.05, 0.4), showticklabels = FALSE),
+        p = plotly::layout(p, title = "Aerobic fitness", 
+                           yaxis = list(title = "laps", range = c(-0.3, 0.2), 
+                                           showticklabels = FALSE),
                            xaxis = list(title = ""))
         p
       })
@@ -214,7 +216,8 @@ mod_ilrs4_server <- function(id){
                             text = ~paste0(round(Motor9()$y, 3), " seconds"),
                             marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c")[3]),
                             showlegend = FALSE)
-        p = plotly::layout(p, yaxis = list(title = "Motor fitness", range = c(-0.05, 0.15), showticklabels = FALSE),
+        p = plotly::layout(p, yaxis = list(title = "Motor fitness", #range = c(-0.05, 0.15), 
+                                           showticklabels = FALSE),
                            xaxis = list(title = ""))
         p
       })
@@ -226,7 +229,8 @@ mod_ilrs4_server <- function(id){
                             text = ~paste0(round(Str9()$y, 3), " SDs"),
                             marker = list(colors = c("#ffa600", "#ff6361", "#bc5090", "#58508d", "#003f5c")[4]),
                             showlegend = FALSE)
-        p = plotly::layout(p, yaxis = list(title = "Muscular fitness", range = c(-0.05, 0.15), showticklabels = FALSE),
+        p = plotly::layout(p, yaxis = list(title = "Muscular fitness", #range = c(-0.05, 0.15), 
+                                           showticklabels = FALSE),
                            xaxis = list(title = ""))
         p
       })

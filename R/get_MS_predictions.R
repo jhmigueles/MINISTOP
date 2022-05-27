@@ -14,9 +14,8 @@ get_MS_predictions = function() {
   # # basic data ----
   # compo_names = c("VPA", "MPA", "LPA", "SB", "Sleep")
   
-  # mean compositions and ilrs ----
-  m4 = c(10.12452, 54.14555, 347.96264, 513.26918, 514.49811)
-  m9 = c(12.71212, 55.71468, 293.33485, 536.14679, 542.09155)
+  # mean composition and ilrs at baseline ----
+  m4 = c(10.44407, 55.27578, 347.65288, 511.51217, 515.11511)
   sbp <- matrix(c(  1, -1, -1, -1, -1,
                     0,  1, -1, -1, -1,
                     0,  0,  1, -1, -1,
@@ -25,41 +24,59 @@ get_MS_predictions = function() {
   psi <- compositions::gsi.buildilrBase(t(sbp))
   
   ilr.m4 = compositions::ilr(m4, V = psi)
-  ilr.m9 = compositions::ilr(m9, V = psi)
   
   # new compositions for predictions ----
   # change in the ilr of interest (a = change in ilr of interest; b = change in the others to compensate a)
   
-  # Change in ILR 1 (from -10 to +30 min of VPA)
-  a = c(1, seq((m4[1] - 10)/m4[1], (m4[1] + 30)/m4[1], length.out = 20))
-  b = (1440 - (m4[1]*a)) / (m4[2] + m4[3] + m4[4] + m4[5])
-  ab_ilr1 = data.frame(ilr = c(0, rep(1, 20)), a = a, b = b,
+  # Change in ILR 1 (from -10 to +30 min of VPA, min by min)
+  a = c(1, seq(m4[1] - 10, m4[1] + 30) / m4[1])
+  b = (1440 - (m4[1] * a)) / (m4[2] + m4[3] + m4[4] + m4[5])
+  ab_ilr1 = data.frame(ilr = c(0, rep(1, length(a) - 1)), a = a, b = b,
                        # time-use composition at 4 years old
-                       VPA4 = m4[1]*a, MPA4 = m4[2]*b, LPA4 = m4[3]*b, SB4 = m4[4]*b, Sleep4 = m4[5]*b)
+                       VPA4 = m4[1]*a, MPA4 = m4[2]*b, LPA4 = m4[3]*b, 
+                       SB4 = m4[4]*b, Sleep4 = m4[5]*b)
   rm(a,b)
   
-  # Change in ILR 2 (from -30 to +30 min of MPA)
+  # Change in ILR 2 (from -30 to +30 min of MPA by 2 min)
+  # 1440 = 10.44407*(a*b*b*b)^(1/4) + 55.27578*a + 347.65288*b + 511.51217*b + 515.11511*b
   # b values calculated in https://www.symbolab.com/solver/equation-calculator
-  a = seq((m4[2] - 30)/m4[2], (m4[2] + 30)/m4[2], length.out = 20)
-  b = c(1.02305, 1.02057, 1.01812, 1.01567, 1.01324, 1.01081, 1.0084, 1.00599, 1.00359, 1.0012, 0.998806, 0.996421,0.994041, 0.991664, 0.989292, 0.986923, 0.984556, 0.982193, 0.979833, 0.977475)
+  a = seq(m4[2] - 30, m4[2] + 30, by = 2) / m4[2]
+  b = c(1.02307, 1.0215, 1.01994, 1.01838, 1.01683, 1.01528,
+        1.01374, 1.0122, 1.01067, 1.00913, 1.00761, 1.00608,
+        1.00608, 1.00304,1.00152, 1.000000000, 0.998486,0.996973,
+        0.995462, 0.993953, 0.992446, 0.99094, 0.989435, 0.987932,
+        0.98643, 0.98493, 0.983431, 0.981932, 0.980435, 0.978939,
+        0.977444)
   ab_ilr2 = data.frame(ilr = 2, a = a, b = b,
                        # time-use composition at 4 years old
-                       VPA4 = m4[1]*(a*b^3)^(1/4), MPA4 = m4[2]*a, LPA4 = m4[3]*b, SB4 = m4[4]*b, Sleep4 = m4[5]*b)
-  rm(a,b)
+                       VPA4 = m4[1]*(a*b^3)^(1/4), MPA4 = m4[2]*a, LPA4 = m4[3]*b, 
+                       SB4 = m4[4]*b, Sleep4 = m4[5]*b)
   
   # Change in ILR 3 (from -90 to +90 min of LPA)
+  # 1440 = 10.44407(((a·b^2)^(1/3))^(1/4) · (a·b^2)^(1/4)) + 55.27578((a·b^2)^(1/3)) + 347.65288·a + 1026.627b
   # b values calculated in https://www.symbolab.com/solver/equation-calculator
-  a = seq((m4[3] - 90)/m4[3], (m4[3] + 90)/m4[3], length.out = 20)
-  b = c(1.09015, 1.08057, 1.07101, 1.06147, 1.05195, 1.04246, 1.03299, 1.02354, 1.01411, 1.0047, 0.995305, 0.985929, 0.97657, 0.967228, 0.957901, 0.94859, 0.939294, 0.930013, 0.920746, 0.911493)
+  a = seq(m4[3] - 90, m4[3] + 90, by = 5) / m4[3]
+  b = c(1.09031, 1.08524, 1.08017, 1.07512, 1.07006, 1.06502, 1.05998,
+        1.05495, 1.04993, 1.04491, 1.03989, 1.03489, 1.02989, 1.02489,
+        1.0199,  1.01492, 1.00994, 1.00497, 1.00000, 0.995037,0.99008,
+        0.985127,0.980179,0.975236,0.970297,0.965363,0.960434,0.955509,
+        0.950588,0.945672,0.94076, 0.935853,0.930949,0.92605, 0.921154,
+        0.916263,0.911375)
   ab_ilr3 = data.frame(ilr = 3, a = a, b = b,
                        # time-use composition at 4 years old
                        VPA4 = m4[1]*((a*b*b)^(1/3))^(1/4) * (a*b*b)^(1/4), MPA4 = m4[2]*(a*b*b)^(1/3), LPA4 = m4[3]*a, SB4 = m4[4]*b, Sleep4 = m4[5]*b)
   rm(a,b)
   
   # Change in ILR 4 (from -300 to +300 min of SB)
+  # 1440=(10.44407(ab)^(1/4))(sqrt(ab)^(1/4))((sqrt(ab)(ab))^(1/3))^(1/4)+55.27578(sqrt(ab)·(ab))^(1/3)+347.65288·sqrt(ab)+511.51217·a+515.11511b
   # b values calculated in https://www.symbolab.com/solver/equation-calculator
-  a = seq((m4[4] - 300)/m4[4], (m4[4] + 300)/m4[4], length.out = 20)
-  b = c(1.70747129300068, 1.61765, 1.53258396271130, 1.45163158459809, 1.37429607331649, 1.30019763836909, 1.22903672376019, 1.16057215920667, 1.09460734053028, 1.03098011732903, 0.969555539924622, 0.910221021541094, 0.852881845533020, 0.797458632034325, 0.743885001892015, 0.692105785227467, 0.642076049762841, 0.593759607742649, 0.547128623508218, 0.502163009780822)
+  a = seq(m4[4] - 300, m4[4] + 300, by = 15) / m4[4]
+  b = c(1.71006670229299, 1.66640191455040, 1.62394854148532, 1.58261212859228, 1.54231162605595, 1.50297737901422, 1.46454833997031,
+        1.42697109098268, 1.39019849515969, 1.35418872980947, 1.31890450514219, 1.28431230994092, 1.25038235623840, 1.21708743618891,
+        1.18440303206502, 1.15230689069605, 1.12077876394383, 1.08980008292947, 1.05935418943891, 1.02942553932630, 1.00000000000000,
+        0.971064552474187,0.942607323564974,0.914617354422225,0.887084495238876,0.859999693825665,0.833354369296217,0.807140733529092,
+        0.781351647358753,0.755980577100591,0.731021471655306,0.706469067493431,0.682318347884886,0.658564858123805,0.635204596272442,
+        0.612233992576200,0.589649891480090,0.567449460973740,0.545630480697629,0.524190876360710,0.503129014405917)
   ab_ilr4 = data.frame(ilr = 4, a = a, b = b,
                        # time-use composition at 4 years old
                        VPA4 = m4[1]*(a*b)^(1/4)*(sqrt(a*b)^(1/4))*((sqrt(a*b)*(a*b))^(1/3))^(1/4), 
@@ -79,121 +96,56 @@ get_MS_predictions = function() {
   # -------------------------------------------------------------------------
   # Predictions of outcomes at 9 years old ----------------------------------
   # -------------------------------------------------------------------------
-  out[, 13:14] = NA; colnames(out)[13:14] = c("a9", "b9")
-  out[, 15:19] = NA; colnames(out)[15:19] = c("VPA9", "MPA9", "LPA9", "SB9", "Sleep9")
-  out[, 20:23] = NA; colnames(out)[20:23] = c("ilr1_fu", "ilr2_fu", "ilr3_fu", "ilr4_fu")
   
-  # mean composition at 9
-  out[1, 13:14] = 1; out[1, 15:19] = m9; out[1, 20:23] = ilr.m9
+  # Mean predictions at follow up (predicted from lavaan) ----
+  attach(dat)
+  for (i in 1:nrow(out)) {
+    ilr.m9_bc = predict_lavaan(fit = fCompo1_BC.sex.age, 
+                               newdata = cbind.data.frame(FMI4 = mean(FMI4),
+                                                          FFMI4 = mean(FFMI4),
+                                                          VPA4_MPA4.LPA4.SB4.SLEEP4 = out[i, "ilr1_bl"],
+                                                          MPA4_LPA4.SB4.SLEEP4 = out[i, "ilr2_bl"],
+                                                          LPA4_SB4.SLEEP4 = out[i, "ilr3_bl"],
+                                                          SB4_SLEEP4 = out[i, "ilr4_bl"],
+                                                          sex = mean(sex),
+                                                          age4 = mean(age4),
+                                                          age9 = mean(age9)))
+    
+    ilr.m9_pf = predict_lavaan(fit = fCompo1_PF.sex.age, 
+                               newdata = cbind.data.frame(laps20m4 = mean(laps20m4),
+                                                          Speed4 = mean(Speed4),
+                                                          Str4 = mean(Str4), 
+                                                          VPA4_MPA4.LPA4.SB4.SLEEP4 = out[i, "ilr1_bl"],
+                                                          MPA4_LPA4.SB4.SLEEP4 = out[i, "ilr2_bl"],
+                                                          LPA4_SB4.SLEEP4 = out[i, "ilr3_bl"],
+                                                          SB4_SLEEP4 = out[i, "ilr4_bl"],
+                                                          sex = mean(sex),
+                                                          age4 = mean(age4),
+                                                          age9 = mean(age9)))
+    
+    
+    if (i == 1) {
+      preds9 = as.data.frame(matrix(NA, nrow = nrow(out), ncol = 14))
+      colnames(preds9) = c("ilr1_fu", "ilr2_fu", "ilr3_fu", "ilr4_fu",
+                           "VPA9", "MPA9", "LPA9", "SB9", "Sleep9",
+                           "FMI9", "FFMI9","laps20m9", "Speed9", "Str9")
+    }
+    
+    # store output
+    preds9[i,] = c(as.numeric(ilr.m9_bc[1, c("VPA9_MPA9.LPA9.SB9.SLEEP9", "MPA9_LPA9.SB9.SLEEP9",
+                                             "LPA9_SB9.SLEEP9", "SB9_SLEEP9")]), 
+                   compositions::clo(compositions::ilrInv(ilr.m9_bc[1, c("VPA9_MPA9.LPA9.SB9.SLEEP9", "MPA9_LPA9.SB9.SLEEP9",
+                                                       "LPA9_SB9.SLEEP9", "SB9_SLEEP9")], V = psi), total = 1440),
+                   as.numeric(ilr.m9_bc[1, c("FMI9", "FFMI9")]),
+                   as.numeric(ilr.m9_pf[1, c("laps20m9", "Speed9", "Str9")]))
+    
+  }
+  detach(dat)
   
-  # for changes in ilr1 at 4 years, then I use the regression coefficient for the ILR1 from 4 to 9 years (0.205)
-  what = which(out$ilr == 1)
-  out$ilr1_fu[what] = ilr.m9[1] + (0.205*(out$ilr1_bl[what] - ilr.m4[1]))
-  out$ilr2_fu[what] = ilr.m9[2]
-  out$ilr3_fu[what] = ilr.m9[3]
-  out$ilr4_fu[what] = ilr.m9[4]
-  
-  out$a9[what] = ilr.m9[1] / out$ilr1_fu[what]
-  out$b9[what] = (1440 - (m9[1]*out$a9[what])) / (m9[2] + m9[3] + m9[4] + m9[5])
-  
-  out$VPA9[what] = m9[1] * out$a9[what]
-  out$MPA9[what] = m9[2] * out$b9[what]
-  out$LPA9[what] = m9[3] * out$b9[what]
-  out$SB9[what] = m9[4] * out$b9[what]
-  out$Sleep9[what] = m9[5] * out$b9[what]
-  
-  # for changes in ilr2 at 4 years, then I use the regression coefficient for the ILR2 from 4 to 9 years (0.181)
-  what = which(out$ilr == 2)
-  out$ilr1_fu[what] = ilr.m9[1]
-  out$ilr2_fu[what] = ilr.m9[2] + (0.181*(out$ilr2_bl[what] - ilr.m4[2]))
-  out$ilr3_fu[what] = ilr.m9[3]
-  out$ilr4_fu[what] = ilr.m9[4]
-  
-  # b: 1440 = 12.71212*(a*b*b*b)^(1/4) + 55.71468*a + 293.33485*b + 536.14679*b + 542.09155*b
-  out$a9[what] = ilr.m9[2] / out$ilr2_fu[what]
-  out$b9[what] = c(1.0029, 1.00248, 1.00211, 1.00176, 1.00144, 1.00115, 1.00087, 1.0006, 1.00035, 1.00011, 0.999888, 0.999671, 0.999463, 0.999263, 0.99907, 0.998884, 0.998704, 0.99853, 0.998361, 0.998197)
-  
-  out$VPA9[what] = m9[1] * (out$a9[what]*out$b9[what])^(1/4)
-  out$MPA9[what] = m9[2] * out$a9[what]
-  out$LPA9[what] = m9[3] * out$b9[what]
-  out$SB9[what] = m9[4] * out$b9[what]
-  out$Sleep9[what] = m9[5] * out$b9[what]
-  
-  # for changes in ilr3 at 4 years, then I use the regression coefficient for the ILR3 from 4 to 9 years (0.046)
-  what = which(out$ilr == 3)
-  out$ilr1_fu[what] = ilr.m9[1]
-  out$ilr2_fu[what] = ilr.m9[2] 
-  out$ilr3_fu[what] = ilr.m9[3] + (0.046*(out$ilr3_bl[what] - ilr.m4[3]))
-  out$ilr4_fu[what] = ilr.m9[4]
-  
-  # b: 1440 = 12.71212(((a·b^2)^(1/3))^(1/4) · (a·b^2)^(1/4)) + 55.71468((a·b^2)^(1/3)) + 293.33485·a + 1078.238b
-  out$a9[what] = ilr.m9[3] / out$ilr3_fu[what]
-  out$b9[what] = c(1.00798, 1.00707, 1.00618, 1.00531, 1.00446, 1.00362, 1.00279, 1.00198, 1.00118, 1.00039, 0.999612, 0.998843, 0.998084, 0.997333, 0.996589, 0.995853, 0.995124, 0.994402, 0.993685, 0.992974)
-  
-  out$VPA9[what] = m9[1]*((out$a9[what]*out$b9[what]*out$b9[what])^(1/3))^(1/4) * (out$a9[what]*out$b9[what]*out$b9[what])^(1/4)
-  out$MPA9[what] = m9[2]*(out$a9[what]*out$b9[what]*out$b9[what])^(1/3)
-  out$LPA9[what] = m9[3] * out$a9[what]
-  out$SB9[what] = m9[4] * out$b9[what]
-  out$Sleep9[what] = m9[5] * out$b9[what]
-  
-  # for changes in ilr4 at 4 years, then I use the regression coefficient for the ILR4 from 4 to 9 years (0.068)
-  what = which(out$ilr == 4)
-  out$ilr1_fu[what] = ilr.m9[1]
-  out$ilr2_fu[what] = ilr.m9[2] 
-  out$ilr3_fu[what] = ilr.m9[3] 
-  out$ilr4_fu[what] = ilr.m9[4] + (0.068*(out$ilr4_bl[what] - ilr.m4[4]))
-  
-  # b: 1440=(12.71212(ab)^(1/4))(sqrt(ab)^(1/4))((sqrt(ab)(ab))^(1/3))^(1/4)+55.71468(sqrt(ab)·(ab))^(1/3)+293.33485·sqrt(ab)+536.14679·a+542.09155b
-  out$a9[what] = ilr.m9[4] / out$ilr4_fu[what]
-  out$b9[what] = c(2.23452572344702, 2.20142290998172, 2.16392797754044, 2.12028600406237, 2.06791236173201,
-                   2.00272094605176, 1.91770520479911, 1.79953880751793, 1.61887029173173, 1.29407698707066,
-                   NA, NA, NA, NA, NA,
-                   NA, NA, NA, NA, NA)
-  
-  out$VPA9[what] = m9[1]*(out$a9[what]*out$b9[what])^(1/4)*(sqrt(out$a9[what]*out$b9[what])^(1/4))*((sqrt(out$a9[what]*out$b9[what])*(out$a9[what]*out$b9[what]))^(1/3))^(1/4)
-  out$MPA9[what] = m9[2]*(sqrt(out$a9[what]*out$b9[what])*(out$a9[what]*out$b9[what]))^(1/3)
-  out$LPA9[what] = m9[3]*sqrt(out$a9[what]*out$b9[what])
-  out$SB9[what] = m9[4] * out$a9[what]
-  out$Sleep9[what] = m9[5] * out$b9[what]
-  
-  # clean out
-  out = out[complete.cases(out), ]
-  
-  # -------------------------------------------------------------------------
-  # BODY COMPOSITION AND PHYSICAL FITNESS PREDICTIONS -----------------------
-  # -------------------------------------------------------------------------
-  out[, 24:27] = NA; colnames(out)[24:27] = c("FMI9", "CRF9", "Motor9", "Str9")
-  
-  # mean composition at 9
-  out[1, 24:27] = 0
-  
-  # for changes in ilr1
-  what = which(out$ilr == 1)
-  out$FMI9[what] = (-0.174*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$CRF9[what] = (1.520*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$Motor9[what] = (-0.099*(out$ilr1_fu[what] - ilr.m9[1]))
-  out$Str9[what] = (0.087*(out$ilr1_fu[what] - ilr.m9[1]))
-  
-  # for changes in ilr2
-  what = which(out$ilr == 2)
-  out$FMI9[what] = (-0.070*(out$ilr2_fu[what] - ilr.m9[2]))
-  out$CRF9[what] = (0.706*(out$ilr2_fu[what] - ilr.m9[2]))
-  out$Motor9[what] = (-0.047*(out$ilr2_fu[what] - ilr.m9[2]))
-  out$Str9[what] = (0.047*(out$ilr2_fu[what] - ilr.m9[2]))
-  
-  # for changes in ilr3
-  what = which(out$ilr == 3)
-  out$FMI9[what] = (-0.019*(out$ilr3_fu[what] - ilr.m9[3]))
-  out$CRF9[what] = (0.236*(out$ilr3_fu[what] - ilr.m9[3]))
-  out$Motor9[what] = (-0.019*(out$ilr3_fu[what] - ilr.m9[3]))
-  out$Str9[what] = (0.020*(out$ilr3_fu[what] - ilr.m9[3]))
-  
-  # for changes in ilr4
-  what = which(out$ilr == 4)
-  out$FMI9[what] = (0.038*(out$ilr4_fu[what] - ilr.m9[4]))
-  out$CRF9[what] = (-0.217*(out$ilr4_fu[what] - ilr.m9[4]))
-  out$Motor9[what] = (0.023*(out$ilr4_fu[what] - ilr.m9[4]))
-  out$Str9[what] = (-0.024*(out$ilr4_fu[what] - ilr.m9[4]))
+  out = cbind(out, preds9)
+  out = round(out, 3)
+  for (i in 2:nrow(out)) out[i,4:8] = out[i,4:8] - out[1,4:8]
+  for (i in 2:nrow(out)) out[i,17:26] = out[i,17:26] - out[1,17:26]
   
   # return
   return(out)
