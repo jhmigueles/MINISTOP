@@ -5,9 +5,9 @@ account: jhmigueles
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6167103
-bundleId: 5988595
+bundleId: 5988925
 url: https://jhmigueles.shinyapps.io/MINISTOP/
-when: 1654681716.04087
-lastSyncTime: 1654681716.04088
+when: 1654689978.15835
+lastSyncTime: 1654689978.15835
 asMultiple: FALSE
 asStatic: FALSE

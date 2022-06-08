@@ -14,7 +14,8 @@ mod_ilrs4_ui <- function(id){
     shinyjs::useShinyjs(),
     
     shiny::sidebarPanel(
-      div(tags$img(src = "img/DAG.PNG", width = "100%")),
+      div(tags$img(src = "img/DAG.PNG", width = "100%"),
+          h6("* Visualization of the mediation path used for the estimations")),
       hr(),
       div(
         shiny::sliderInput(inputId = ns("ilr1"),
