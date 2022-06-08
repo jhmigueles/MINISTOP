@@ -6,13 +6,16 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
+#' @importFrom shiny NS tagList
+#' @importFrom htmltools img
 mod_ilrs4_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
     
     shiny::sidebarPanel(
+      div(tags$img(src = "img/DAG.PNG", width = "100%")),
+      hr(),
       div(
         shiny::sliderInput(inputId = ns("ilr1"),
                            label = "Reallocation of min/day to vigorous PA at 4 years old",
@@ -23,24 +26,17 @@ mod_ilrs4_ui <- function(id){
       hr(),
       div(style = "font-size:80%",
           # h4("Your selection (4 years old)"),
-          hr(),
-          hr(),
           col_6(DT::dataTableOutput(ns("Table4"))),
-          col_6(plotly::plotlyOutput(ns("pieChart4"))),
-          hr()
+          col_6(plotly::plotlyOutput(ns("pieChart4")))
       ),
-      div(
-        uiOutput(ns("img")),
-        hr(),
-        div("citation to paper when published")
-      )
+      div("Author: Jairo H Migueles <jairo.hidalgo.migueles@gmail.com>")
     ),
     
     shiny::mainPanel(
       fluidRow(
         div(
           col_6(
-            h3("Change in behaviours at 9 years (Mediator)"),
+            h3("Change in behaviours at 9 years (mediator)"),
             hr(),
             plotly::plotlyOutput(ns("barChart9"))
           ),
@@ -51,6 +47,10 @@ mod_ilrs4_ui <- function(id){
             col_6(plotly::plotlyOutput(ns("barCRF9")))
           )
         )
+      ),
+      fluidRow(
+        hr(),
+        h5("* Citation to paper when published")
       )
     )
   )
@@ -64,8 +64,8 @@ mod_ilrs4_server <- function(id){
     ns <- session$ns
     
     # DAG picture
-    output$img = renderUI({tags$img(src = "img/DAG.PNG", width = "100%")}) 
-    
+    # output$img = shiny::renderUI({tags$img(src = "img/DAG.PNG", width = "100%")}) 
+
     # PIE CHART 4 years old ------------------------------------------------
     # data for plot if ILR 1 modified
     
@@ -108,7 +108,7 @@ mod_ilrs4_server <- function(id){
                                         line = list(color = '#FFFFFF', width = 2)),
                           showlegend = FALSE)
       p = plotly::layout(p, title = '\n', autosize = F, width = 200, height = 200, 
-                         margin = list(l = 0, r = 10, b = 0, t = 0, pad = 4),
+                         margin = list(l = 0, r = 10, b = 0, t = 0, pad = 0),
                          paper_bgcolor = 'transparent')
       p
     })

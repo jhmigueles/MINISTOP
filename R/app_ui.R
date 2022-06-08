@@ -29,6 +29,9 @@ golem_add_external_resources <- function(){
   add_resource_path(
     'www', app_sys('app/www')
   )
+  addResourcePath( 
+    'img', app_sys('app/img')
+  )
  
   tags$head(
     favicon(),
@@ -40,4 +43,3 @@ golem_add_external_resources <- function(){
     # for example, you can add shinyalert::useShinyalert() 
   )
 }
-
